@@ -1,13 +1,117 @@
-import {db} from "../database.js";
+import { db } from "../database.js";
+
+import { API_PREFIX, CUSTOM_HEADER_FEHLER, HTTP_STATUS_CODES } from "./konstanten.js";
+
+import eventService from "../services/event.service.js";
+
+const logger = logging.default("sg-controller");
+
 
 export default function registerRoutes(app) {
-    // Ganze Collection
-    app.get("/api/events", getAllEvents);
+
+
+    const entityTyp = "event";
+
+    const prefixFuerRouten = `${API_PREFIX}/${entityTyp}`;
+
+    const routeRessource = `${prefixFuerRouten}/:name`;
+    const routeCollection = `${prefixFuerRouten}/`;
+
+
+    app.get(routeCollection, getCollection);
+    logger.info(`Route registriert: GET ${routeCollection}`);
+
+    app.get(routeRessource, getResource)
+    logger.info(`Route registriert: GET ${routeRessource}`);
+
+    app.post(routeCollection, postCollection);
+    logger.info(`Route registriert: POST ${routeCollection}`);
 };
 
-function getAllEvents(req, res) {
-    let result = db.data.Events;
+function getCollection(req, res) {
 
-    res.status(200);
-    res.send(result);
+    let ergebnisArray = null;
+
+    ergebnisArray = eventService.getAlle();
+
+    if (ergebnisArray.length === 0) {
+
+        res.status(404);
+        res.json([]);
+    } else {
+        res.status(200);
+        res.json(ergebnisArray);
+    }
+}
+
+
+function getResource(req, res) {
+    const name = req.params.name;
+
+    const ergebnisObjekt = eventService.getByName(name);
+
+    if (ergebnisArray.length === 0) {
+
+        res.status(404);
+        res.json([]);
+
+    } else {
+
+        res.status(200);
+        res.json(ergebnisObjekt);
+    }
+}
+
+async function postCollection(req , res) {
+    const name = req.body.name;
+    const date = req.body.date;
+    const location = req.bpdy.location;
+    const capacity = req.body.capazity;
+
+    if(name === undefined || name.trim() === "") {
+        res.setHeader(CUSTOM_HEADER_FEHLER, "Attribut 'Name' fehlt oder ist leer.");
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST_400);
+        res.json({});
+        return;
+    }
+    if(date === undefined || date.trim() === "") {
+        res.setHeader(CUSTOM_HEADER_FEHLER, "Attribut 'date' fehlt oder ist leer.");
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST_400);
+        res.json({});
+        return;
+    }
+    if(location === undefined || location.trim() === "") {
+        res.setHeader(CUSTOM_HEADER_FEHLER, "Attribut 'location' fehlt oder ist leer.");
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST_400);
+        res.json({});
+        return;
+    }
+    if(capacity === undefined || capacity.trim() === "") {
+        res.setHeader(CUSTOM_HEADER_FEHLER, "Attribut 'capacity' fehlt oder ist leer.");
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST_400);
+        res.json({});
+        return;
+    }
+    
+    const neuObjekt = {
+        name: name.trim(),
+        date: date.trim(),
+        location: location.trim(),
+        capacity: capacity.trim()
+    }
+
+    const erfolgreich = await eventService.neu(neuObjekt);
+
+    if (erfolgreich) {
+
+        res.status( HTTP_STATUS_CODES.CREATED_201 );
+        res.json( neuObjekt );
+
+    } else {
+
+        res.setHeader(CUSTOM_HEADER_FEHLER, "Veranstaltung mit diese Angaben existieren bereits.");
+        res.status( HTTP_STATUS_CODES.CONFLICT_409 );
+        res.json( {} );
+    }
+
 }

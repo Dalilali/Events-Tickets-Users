@@ -3,7 +3,7 @@ import {wrapAsync} from "../utils.js";
 
 
 
-const prefix = "/api/tickt"
+const prefix = "/api/ticket"
 
 
 export default function registerRoutes(app){

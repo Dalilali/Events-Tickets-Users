@@ -4,7 +4,7 @@ import logging from "logging";
 
 import datenbankObjekt  from "./database.js";
 import controllerArray  from "./controller/index.js";
-import middlewareArray  from "./middleware/allgemein.middleware.js";
+import middlewareArray  from "./middleware/allgemein.middlerware.js";
 
 const logger = logging.default("main");
 

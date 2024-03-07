@@ -1,10 +1,8 @@
-import { db } from "../database.js";
-
 import { API_PREFIX, CUSTOM_HEADER_FEHLER, HTTP_STATUS_CODES } from "./konstanten.js";
-
+import logging from "logging";
 import eventService from "../services/event.service.js";
 
-const logger = logging.default("sg-controller");
+const logger = logging.default("events-controller");
 
 
 export default function registerRoutes(app) {
@@ -48,7 +46,7 @@ function getCollection(req, res) {
 function getResource(req, res) {
     const name = req.params.name;
 
-    const ergebnisObjekt = eventService.getByName(name);
+    const ergebnisObjekt = eventService.getByEventname(name);
 
     if (ergebnisArray.length === 0) {
 
@@ -63,12 +61,12 @@ function getResource(req, res) {
 }
 
 async function postCollection(req , res) {
-    const name = req.body.name;
+    const eventname = req.body.eventname;
     const date = req.body.date;
     const location = req.bpdy.location;
     const capacity = req.body.capazity;
 
-    if(name === undefined || name.trim() === "") {
+    if(eventname === undefined || eventname.trim() === "") {
         res.setHeader(CUSTOM_HEADER_FEHLER, "Attribut 'Name' fehlt oder ist leer.");
         res.status(HTTP_STATUS_CODES.BAD_REQUEST_400);
         res.json({});
@@ -93,19 +91,19 @@ async function postCollection(req , res) {
         return;
     }
     
-    const neuObjekt = {
-        name: name.trim(),
+    const neuObject = {
+        eventname: eventname.trim(),
         date: date.trim(),
         location: location.trim(),
         capacity: capacity.trim()
     }
 
-    const erfolgreich = await eventService.neu(neuObjekt);
+    const erfolgreich = await eventService.neu(neuObject);
 
     if (erfolgreich) {
 
         res.status( HTTP_STATUS_CODES.CREATED_201 );
-        res.json( neuObjekt );
+        res.json( neuObject );
 
     } else {
 

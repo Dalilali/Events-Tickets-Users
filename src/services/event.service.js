@@ -7,12 +7,7 @@ import datenbankObjekt from "../database.js";
 const logger = logging.default("event-service");
 
 
-/**
- * Alle Events zurückgeben.
- *
- * @returns Array mit eventsobjekten; kann leer sein,
- *          aber nicht `null` oder `undefined`.
- */
+
 function getAlle() {
 
     const ergebnisArray = datenbankObjekt.eventGetAlle();
@@ -22,13 +17,13 @@ function getAlle() {
     return ergebnisArray;
 }
 
-function getByName(name) {
+function getByEventname(name) {
 
     const nameLoweCase = name.toLowerCase();
 
-    const alleArray = db.getAlle();
+    const alleArray = datenbankObjekt.eventGetAlle();
 
-    const filterFkt = (user) => user.name.toLowerCase === nameLoweCase;
+    const filterFkt = (en) => en.eventname.toLowerCase === nameLoweCase;
 
     const ergebnisArray = alleArray.filer(filterFkt);
 
@@ -46,18 +41,7 @@ function getByName(name) {
 
 
 
-
-/**
- * Neuen ver anlegen.
- *
- * @param {*} eventObjekt Objekt mit `kurz` und `lang` als Attribute
- *
- * @returns `true`, wenn der Studiengang neu angelegt wurde, sonst `false`
- *          (weil es schon einen Studiengang mit dem gleichen Kurznamen gibt).
- */
 async function neu(eventObjekt) {
-
-    // Überprüfen, ob es schon einen Studiengang mit dem gleichen Kurznamen gibt.
 
     const eventname = eventObjekt.eventname;
 
@@ -77,7 +61,4 @@ async function neu(eventObjekt) {
 }
 
 
-/**
- * Alle Funktionen als Objekt exportieren.
- */
-export default { getAlle, suche, getByName, neu };
+export default { getAlle, getByEventname, neu };

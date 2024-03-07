@@ -1,114 +1,128 @@
-import database from "../database.js";
+import datenbankObjekt from "../database.js";
+import eventService from "../services/event.service.js"
 
-/**
- * Codeschnipsel suchen anhand beliebiger Suchbegriffe. Es werden alle Codeschnipsel
- * ermittelt, die den gesuchten Suchbegriff in einem ihrer Textfelder enthalten.
- * 
- * @param {string} query Suchbegriff
- * @returns {Promise<Object[]>} Gefundene Codeschnipsel
- */
-export async function search(query) {
-    let result = database.db.data.Snippet;
+import logging from "logging";
 
-    if (query) {
-        query = `${query}`.toLowerCase();
-        result = result.filter(entry => {
-            return entry.language.toLowerCase().includes(query)
-                || entry.name.toLowerCase().includes(query)
-                || entry.content.toLowerCase().includes(query);
-        });
+const logger = logging.default("ticket-service");
+
+function getAlle() {
+
+    const ergebnisArray = datenbankObjekt.ticketGetAlle();
+
+    logger.info("Anzahl Benutzer ausgelesen: " + ergebnisArray.length);
+
+    return ergebnisArray;
+}
+
+function getTicketById(id) {
+
+    const alleArray = datenbankObjekt.ticketGetAlle();
+
+    const filterFkt = (ticketid) => ticketid === id;
+
+    const ergebnisArray = alleArray.filer(filterFkt);
+
+    if (ergebnisArray.length === 0) {
+
+        logger.warn(`Kein Ticket mit "${id}" gefunden.`);
+        return null;
+
+    } else {
+
+        logger.info(`Ticket mit "${id}" gefunden.`);
+        return ergArray[0];
+    }
+}
+
+function getAnzahlTicketByEvent(name) {
+    const alleArray = datenbankObjekt.ticketGetAlle();
+
+    const filterFkt = (en) => en.eventname.toLowerCase === name.toLowerCase;
+
+    const ergebnisArray = alleArray.filter(filterFkt);
+
+    const ergebnisArraylength = ergebnisArray.length;
+    if (ergebnisArraylength === 0) {
+
+        logger.warn(`Kein Ticket mit für die Veranstaltung: ${name} gefunden.`);
+        return null;
+
+    } else {
+
+        logger.info(`${ergebnisArraylength} Tickets bei der Veranstaltung ${name} gefunden.`);
+        return ergebnisArraylength;
+    }
+}
+function getTicketByUser(name) {
+    const alleArray = datenbankObjekt.ticketGetAlle();
+    const filterFkt = (un) => un.username.toLowerCase === name.toLowerCase;
+
+    const ergebnisArray = alleArray.filter(filterFkt);
+
+    if (ergebnisArray.length === 0) {
+
+        logger.warn(`Kein Ticket für den Benutzer "${name}" gefunden.`);
+        return null;
+
+    } else {
+
+        logger.info(`Folgende Tickets für den Benutzer "${name}" gefunden.`);
+        return ergebnisArray;
     }
 
-    return result;
 }
 
-/**
- * Anlegen eines neuen Codeschnipsels.
- * 
- * @param {Object} snippet Zu speichernde Daten
- * @returns {Promise<Object>} Gespeicherte Daten
- */
-export async function create(snippet) {
-    if (!snippet) return;
 
-    let entry = {
-        id:       database.getNextId(database.db.data.Snippet),
-        language: `${snippet.language || ""}`.trim(),
-        name:     `${snippet.name     || ""}`.trim(),
-        content:  `${snippet.content  || ""}`.trim(),
-    };
+async function neu(ticketObject) {
 
-    validateSnippet(entry);
-    database.db.data.Snippet.push(entry);
-    await database.db.write();
+    const allEventArray = datenbankObjekt.eventGetAlle;
 
-    return entry;
+    const filterFkt = (en) => en.eventname.toLowerCase === ticketObjekt.eventname;
+
+    const ergebnisArray = allEventArray.filer(filterFkt);
+
+    if (ergebnisArray.length === 0) {
+        logger.warn(`Keine Veranstaltung mit den "${ticketObject.eventname}" gefunden.`);
+        return false;
+    }
+    if (ergebnisArray[0].capacity === getAnzahlTicketByEvent(ergebnisArray[0])) {
+        logger.warn(`Leider ist die Veranstaltung "${ticketObject.eventname}" voll belegt daher keine Tickts mehr verfügbar.`);
+        return false;
+    }
+
+    //To-Do : Check if the User are in the System 
+
+
+    await datenbankObjekt.ticketNeu(ticketObject);
+
+    logger.info(`Neuer ticket angelegt: ${ticketObject.ticketid} -
+                                        ${ticketObject.eventname} - 
+                                        ${ticketObject.username} - 
+                                        ${ticketObject.price} - 
+                                        ${ticketObject.buydate}`);
+
+    return true;
 }
 
-/**
- * Auslesen eines Codeschnipsels anhand seiner ID.
- * 
- * @param {integer} id Song ID
- * @returns {Promise<Object>} Song oder undefined
- */
-export async function read(id) {
-    let index = database.findIndex(database.db.data.Tickts, parseInt(id));
-    if (index >= 0) return database.db.data.Tickts[index];
+async function deleteTicket(id) {
+
+    const ticketgefunden = getTicketById(id);
+    if (!ticketgefunden) {
+        lgger.warn(`Löschen fehlgeschlagen, Kein Ticket mit der ID ${id} gefunden`);
+        return false;
+    }
+    await datenbankObjekt.ticketloeschen(id);
+
+    logger.info(`Ticket mit der ID ${id} gelöscht: ` +
+        `${ticketgefunden.eventname} ${ticketgefunden.eventname}`);
+    return true;
 }
 
-/**
- * Aktualisieren eines Codeschnipsels durch Überschreiben einzelner Felder
- * oder des gesamten Codeschnipsel-Objekts.
- * 
- * @param {integer} TicketId Ticket ID
- * @param {Object} ticket Zu speichernde Daten
- * @returns {Promise<Object>} Gespeicherte Daten oder undefined
- */
-export async function update(TicketId, ticket) {
-    let existing = await read(parseInt(TicketId));
-    if (!existing) return;
+let currentId = 10000;
 
-    if (ticket.name)     existing.name     = `${ticket.name}`.trim();
-    if (ticket.language) existing.language = `${ticket.language}`.trim();
-    if (ticket.content)  existing.content  = `${ticket.content}`.trim();
-
-    validateSnippet(existing);
-    await database.db.write();
-
-    return existing;
+function generateNewId() {
+    currentId++;
+    return currentId;
 }
 
-/**
- * Löschen eines Codeschnipsels anhand seiner ID.
- * 
- * @param {integer} id Codeschnipsel ID
- * @returns {Promise<integer>} Anzahl der gelöschten Datensätze
- */
-export async function remove(id) {
-    let countBefore = database.db.data.Snippet.length;
-    database.db.data.Snippet = database.db.data.Snippet.filter(entry => entry.id !== parseInt(id));
-    let countAfter = database.db.data.Snippet.length;
-
-    await database.db.write();
-    return countBefore - countAfter;
-}
-
-/**
- * Diese Funktion prüft die Inhalte eines Codeschnipsels. Wenn alles in Ordnung ist,
- * passiert nichts. Wenn ein Fehler gefunden wird, wirft sie eine Exception mit einer
- * entsprechenden Fehlermeldung (z.B. "Name fehlt").
- * 
- * @param {Object} snippet Zu prüfender Codeschnipsel
- */
-function validateSnippet(snippet) {
-    if (!snippet.name) throw new Error("Name fehlt");
-    if (!snippet.content) throw new Error("Inhalt fehlt");
-
-    if (!snippet.language) snippet.language = "";
-    snippet.language = snippet.language.toLowerCase();
-    
-    let language = database.db.data.Language.find(entry => entry.language === snippet.language);
-    if (!language) throw new Error(`Unbekannte Programmiersprache: ${snippet.language}`);
-}
-
-export default {search, create, read, update, remove};
+export default { getAlle, getAnzahlTicketByEvent, getTicketById, getTicketByUser, neu, deleteTicket, generateNewId };

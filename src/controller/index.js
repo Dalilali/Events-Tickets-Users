@@ -1,9 +1,8 @@
-import EventsController from "./events.controller";
-import TicketsController from "./tickets.controller";
-import UsersController from "./users.controller";
+import EventsController from "./events.controller.js";
+import TicketsController from "./tickets.controller.js";
+//import UsersController from "./users.controller.js";
 
 
 export default [
     EventsController,
-    TicketsController,
-    UsersController];
+    TicketsController];

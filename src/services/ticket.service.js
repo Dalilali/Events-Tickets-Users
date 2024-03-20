@@ -1,5 +1,4 @@
 import datenbankObjekt from "../database.js";
-import eventService from "../services/event.service.js"
 
 import logging from "logging";
 
@@ -9,7 +8,7 @@ function getAlle() {
 
     const ergebnisArray = datenbankObjekt.ticketGetAlle();
 
-    logger.info("Anzahl Benutzer ausgelesen: " + ergebnisArray.length);
+    logger.info("Anzahl Tickets ausgelesen: " + ergebnisArray.length);
 
     return ergebnisArray;
 }
@@ -30,7 +29,7 @@ function getTicketById(id) {
     } else {
 
         logger.info(`Ticket mit "${id}" gefunden.`);
-        return ergArray[0];
+        return ergebnisArray[0];
     }
 }
 

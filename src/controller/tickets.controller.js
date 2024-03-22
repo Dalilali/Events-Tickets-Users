@@ -17,6 +17,8 @@ export default function registerRoutes(app) {
     app.get(routeRessource , getResource);
     
     app.post(routeCollection, postResource);
+    
+    app.delete(routeRessource, deleteResource);
 
 }
 

@@ -112,7 +112,7 @@ async function userAendern(user, deltaObjekt) {
 
     let userObjekt = null;
     for (let i = 0; i < db.data.users.length; i++) {
-        if (db.data.studis[i].matrikelnr === matrikelnr) {
+        if (db.data.users[i].userid === user) {
 
             userObjekt = db.data.users[i];
             break;
@@ -121,7 +121,7 @@ async function userAendern(user, deltaObjekt) {
     }
     if (userObjekt === null) {
 
-        logger.error(`INTERNER FEHLER: Kein Studi mit Matrikelnr "${matrikelnr}" gefunden.`);
+        logger.error(`INTERNER FEHLER: Kein User mit UserID "${user}" gefunden.`);
         return null;
     }
 
@@ -133,7 +133,7 @@ async function userAendern(user, deltaObjekt) {
     if (deltaObjekt.email) {
 
         userObjekt.email = deltaObjekt.email;
-        logger.info(`Email von User ${name} geändert: ${userObjekt.nachname}`);
+        logger.info(`Email von User ${user} geändert: ${userObjekt.email}`);
     }
 
     await db.write();

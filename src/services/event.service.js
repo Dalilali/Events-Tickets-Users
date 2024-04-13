@@ -1,5 +1,3 @@
-// Diese Datei enthält die Business-Logik für den Entitätstyp "Studiengang" (sg).
-
 import logging         from "logging";
 import datenbankObjekt from "../database.js";
 
@@ -29,7 +27,7 @@ function getByEventname(name) {
 
     if (ergebnisArray.length === 0) {
 
-        logger.warn(`Kein User mit "${name}" gefunden.`);
+        logger.warn(`Kein Event mit "${name}" gefunden.`);
         return null;
 
     } else {

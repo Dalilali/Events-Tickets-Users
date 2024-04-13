@@ -26,7 +26,7 @@ function getUserById(id) {
     if (ergebnisArray.length === 0) {
 
         logger.warn(`Kein User mit der ID: ${id} gefunden.`);
-        return null;
+        return {};
     }
     else {
         logger.info(`User mit der ID: ${id} gefunden`);

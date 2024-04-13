@@ -28,9 +28,7 @@ export default function registerRoutes(app) {
 
 function getCollection(req, res) {
 
-    let ergebnisArray = null;
-
-    ergebnisArray = eventService.getAlle();
+    const ergebnisArray = eventService.getAlle();
 
     if (ergebnisArray.length === 0) {
 

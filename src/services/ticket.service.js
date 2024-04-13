@@ -17,14 +17,14 @@ function getTicketById(id) {
 
     const alleArray = datenbankObjekt.ticketGetAlle();
 
-    const filterFkt = (ticketid) => ticketid === id;
+    const filterFkt = (tickets) => tickets.ticketid === id;
 
-    const ergebnisArray = alleArray.filer(filterFkt);
+    const ergebnisArray = alleArray.filter(filterFkt);
 
     if (ergebnisArray.length === 0) {
 
         logger.warn(`Kein Ticket mit "${id}" gefunden.`);
-        return null;
+        return {};
 
     } else {
 
@@ -88,8 +88,6 @@ async function neu(ticketObject) {
         logger.warn(`Leider ist die Veranstaltung "${ticketObject.eventname}" voll belegt daher keine Tickts mehr verfügbar.`);
         return false;
     }
-
-    //To-Do : Check if the User are in the System 
 
 
     await datenbankObjekt.ticketNeu(ticketObject);

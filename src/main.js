@@ -13,7 +13,6 @@ const app = express();
 
 await datenbankObjekt.initialisieren();
 
-// Damit Body von HTTP-POST-Request als JSON interpretiert wird
 app.use( express.json() );
 app.use( express.static("public") );
 app.use( middlewareArray );

@@ -23,11 +23,11 @@ export default function registerRoutes(app) {
 }
 
 function getResource(req, res) {
-    const id = req.parms.id;
+    const id = req.params.id;
 
     const ergebnisObjekt = ticketService.getTicketById(id);
 
-    if (ergebnisArray.length === 0) {
+    if (ergebnisObjekt.length === 0) {
 
         res.status(404);
         res.json([]);
